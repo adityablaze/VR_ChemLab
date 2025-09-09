@@ -1,2 +1,2 @@
 # VR_ChemLab
-A VR based Chemistry lab 
+A VR based Chemistry lab project.
