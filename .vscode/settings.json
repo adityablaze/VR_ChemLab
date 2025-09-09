@@ -56,5 +56,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "vr_chem_lab.sln"
+    "dotnet.defaultSolution": "VR_ChemLab.sln"
 }
