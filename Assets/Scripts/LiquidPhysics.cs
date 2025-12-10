@@ -52,7 +52,7 @@ public class LiquidPhysics : MonoBehaviour
     {
         if (mesh == null) return;
 
-        // 1. Measure the liquid mesh
+        // 1. Measure the liquid mesh 
         Bounds bounds = mesh.bounds;
         
         // 2. Send the Top and Bottom Y-values to the shader
