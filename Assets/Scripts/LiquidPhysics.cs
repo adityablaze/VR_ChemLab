@@ -187,4 +187,21 @@ public class LiquidPhysics : MonoBehaviour
             precipitateRenderer.material.SetFloat(SceneColorAmtID, currentPptChemical.sceneColourAmount);
         }
     }
+
+    /// <summary>
+    /// Removes liquid from this container and returns the actual ChemicalData being poured.
+    /// </summary>
+    public ChemicalData PourOut(float amountToRemove)
+    {
+        if (currentLiquidVolume <= 0) return null;
+
+        // Reduce volume
+        currentLiquidVolume -= amountToRemove;
+        
+        // Safety clamp
+        if (currentLiquidVolume < 0) currentLiquidVolume = 0;
+
+        // Return the chemical we just poured
+        return currentChemical;
+    }
 }
