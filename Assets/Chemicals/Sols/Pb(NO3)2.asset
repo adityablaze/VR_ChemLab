@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Pb(NO3)2
   m_EditorClassIdentifier: Assembly-CSharp::ChemicalData
   chemicalName: Pb(NO3)2
-  liquidColor: {r: 0, g: 0.9083476, b: 1, a: 1}
+  liquidColor: {r: 0, g: 0.61960787, b: 1, a: 1}
   liquidTopColor: {r: 1.5104778, g: 3.0439591, b: 3.953349, a: 1}
   sceneColourAmount: 0.94
   viscosity: 0.5

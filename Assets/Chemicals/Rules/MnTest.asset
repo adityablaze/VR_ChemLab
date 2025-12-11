@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d4ee08956b0bd944979aca8e60416a0, type: 3}
+  m_Name: MnTest
+  m_EditorClassIdentifier: Assembly-CSharp::ReactionRule
+  inputChemicalA: {fileID: 11400000, guid: a61b9d198e1aa1d46a5e57991d8cf863, type: 2}
+  inputChemicalB: {fileID: 11400000, guid: b3f806b25ecfdd4429ce1d6ca0c859ab, type: 2}
+  resultLiquid: {fileID: 0}
+  resultPrecipitate: {fileID: 11400000, guid: 4e3eece526f303d45b8345db6c23f798, type: 2}
+  hasPrecipitate: 1

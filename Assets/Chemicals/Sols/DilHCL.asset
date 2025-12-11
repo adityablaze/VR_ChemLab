@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DilHCL
   m_EditorClassIdentifier: Assembly-CSharp::ChemicalData
   chemicalName: DilHCL
-  liquidColor: {r: 0, g: 1, b: 0.6671865, a: 1}
+  liquidColor: {r: 0.4669811, g: 1, b: 0.8223271, a: 1}
   liquidTopColor: {r: 0, g: 2, b: 1.6705884, a: 1}
   sceneColourAmount: 0.94
   viscosity: 0.5

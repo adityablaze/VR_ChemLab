@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: CuSO4
   m_EditorClassIdentifier: Assembly-CSharp::ChemicalData
   chemicalName: CuSO4
-  liquidColor: {r: 0, g: 1.157771, b: 2.670157, a: 1}
+  liquidColor: {r: 0, g: 0.7458366, b: 2.6701574, a: 1}
   liquidTopColor: {r: 0, g: 1.1137255, b: 2, a: 1}
   sceneColourAmount: 0.93
   viscosity: 0.5

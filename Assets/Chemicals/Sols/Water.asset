@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Water
   m_EditorClassIdentifier: Assembly-CSharp::ChemicalData
   chemicalName: Water
-  liquidColor: {r: 0, g: 0.7529412, b: 1, a: 1}
+  liquidColor: {r: 0, g: 0.620383, b: 1, a: 1}
   liquidTopColor: {r: 1.5104778, g: 3.0439591, b: 3.953349, a: 1}
-  sceneColourAmount: 0.94
+  sceneColourAmount: 0.96
   viscosity: 0.5
   isDangerous: 0
