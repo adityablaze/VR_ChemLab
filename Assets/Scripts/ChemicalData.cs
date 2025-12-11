@@ -13,6 +13,8 @@ public class ChemicalData : ScriptableObject
     [ColorUsage(true, true)]
     public Color liquidTopColor;
 
+    [Range(0.0f, 1.0f)]
+    public float sceneColourAmount;
     [Range(0f, 1f)]
     public float viscosity = 0.5f;
     [Header("Properties")]

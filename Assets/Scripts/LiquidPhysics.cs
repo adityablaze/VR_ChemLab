@@ -4,12 +4,25 @@ using UnityEngine;
 [RequireComponent(typeof(MeshFilter))]
 public class LiquidPhysics : MonoBehaviour
 {
+    [Header("Components")]
+    [Tooltip("The main liquid mesh (the one that wobbles)")]
+    public Renderer mainRenderer;
+    [Tooltip("The child mesh for the precipitate (optional)")]
+    public Renderer precipitateRenderer;
+
     [Header("Volume Settings")]
     [Tooltip("The total capacity of this container in milliliters.")]
     public float maxVolume = 1000f; 
     
-    [Tooltip("The current liquid amount in milliliters.")]
-    public float currentVolume = 500f;
+    [Tooltip("The current liquid amount.")]
+    public float currentLiquidVolume = 500f;
+    [Tooltip("The current precipitate amount.")]
+    public float currentPptVolume = 0f;
+
+    [Header("Chemical Content")]
+    public ChemicalData currentChemical; // The main liquid identity
+    public ChemicalData currentPptChemical; // The precipitate identity (if any)
+    public ReactionRegistry registry;
 
     [Header("Wobble Settings")]
     public float MaxWobble = 0.03f;
@@ -17,18 +30,19 @@ public class LiquidPhysics : MonoBehaviour
     public float Recovery = 1f;
 
     // Internal variables
-    private Renderer rend;
     private Mesh mesh;
     
-    // Shader Property IDs (Optimization)
-    private static readonly int FillID = Shader.PropertyToID("_Fill"); // Make sure this matches your Shader Graph!
+    // Shader Property IDs
+    private static readonly int FillID = Shader.PropertyToID("_Fill");
+    private static readonly int LiquidColorID = Shader.PropertyToID("_LiquidColour");
+    private static readonly int SceneColorAmtID = Shader.PropertyToID("_SceneColourAmount");
     private static readonly int UpVectorID = Shader.PropertyToID("_UpVector");
     private static readonly int LocalYMinID = Shader.PropertyToID("_LocalYMin");
     private static readonly int LocalYMaxID = Shader.PropertyToID("_LocalYMax");
     private static readonly int WobbleXID = Shader.PropertyToID("_WobbleX");
     private static readonly int WobbleZID = Shader.PropertyToID("_WobbleZ");
 
-    // Wobble Math Variables
+    // Wobble Physics Variables
     private Vector3 lastPos;
     private Vector3 velocity;
     private Vector3 lastRot;
@@ -42,68 +56,135 @@ public class LiquidPhysics : MonoBehaviour
 
     void Start()
     {
-        rend = GetComponent<Renderer>();
+        // Auto-assign main renderer if missing
+        if (mainRenderer == null) mainRenderer = GetComponent<Renderer>();
         mesh = GetComponent<MeshFilter>().mesh;
 
         SendMeshBounds();
+        UpdateAllVisuals();
     }
 
     void SendMeshBounds()
     {
         if (mesh == null) return;
-
-        // 1. Measure the liquid mesh 
         Bounds bounds = mesh.bounds;
-        
-        // 2. Send the Top and Bottom Y-values to the shader
-        // This ensures 0 volume is at the bottom, and Max volume is at the top.
-        rend.material.SetFloat(LocalYMinID, bounds.min.y);
-        rend.material.SetFloat(LocalYMaxID, bounds.max.y);
+
+        // Send bounds to BOTH renderers so they fill correctly
+        if(mainRenderer != null)
+        {
+            mainRenderer.material.SetFloat(LocalYMinID, bounds.min.y);
+            mainRenderer.material.SetFloat(LocalYMaxID, bounds.max.y);
+        }
+        if(precipitateRenderer != null)
+        {
+            precipitateRenderer.material.SetFloat(LocalYMinID, bounds.min.y);
+            precipitateRenderer.material.SetFloat(LocalYMaxID, bounds.max.y);
+        }
     }
 
     void Update()
     {
-        // --- 1. VOLUME LOGIC ---
-        // Ensure volume stays within bounds (0 to Max)
-        currentVolume = Mathf.Clamp(currentVolume, 0, maxVolume);
+        currentLiquidVolume = Mathf.Clamp(currentLiquidVolume, 0, maxVolume);
+        currentPptVolume = Mathf.Clamp(currentPptVolume, 0, maxVolume - currentLiquidVolume); // Can't exceed total space
 
-        // Calculate the percentage (0.0 to 1.0)
-        float fillPercent = currentVolume / maxVolume;
+        float liquidFill = currentLiquidVolume / maxVolume;
+        float pptFill = currentPptVolume / maxVolume;
 
-        // Send to Shader
-        rend.material.SetFloat(FillID, fillPercent);
+        if(mainRenderer) mainRenderer.material.SetFloat(FillID, liquidFill);
+        if(precipitateRenderer) precipitateRenderer.material.SetFloat(FillID, pptFill);
 
-
-        // --- 2. GRAVITY LOGIC ---
-        // Calculate "Up" in local space so the liquid stays level
         Vector3 localUp = transform.InverseTransformDirection(Vector3.up);
-        rend.material.SetVector(UpVectorID, localUp);
+        if(mainRenderer) mainRenderer.material.SetVector(UpVectorID, localUp);
+        if(precipitateRenderer) precipitateRenderer.material.SetVector(UpVectorID, localUp);
+        if (mainRenderer != null)
+        {
+            time += Time.deltaTime;
+            // Decrease wobble
+            wobbleAmountToAddX = Mathf.Lerp(wobbleAmountToAddX, 0, Time.deltaTime * Recovery);
+            wobbleAmountToAddZ = Mathf.Lerp(wobbleAmountToAddZ, 0, Time.deltaTime * Recovery);
 
+            pulse = 2 * Mathf.PI * WobbleSpeed;
+            wobbleAmountX = wobbleAmountToAddX * Mathf.Sin(pulse * time);
+            wobbleAmountZ = wobbleAmountToAddZ * Mathf.Sin(pulse * time);
 
-        // --- 3. WOBBLE LOGIC (Unchanged) ---
-        time += Time.deltaTime;
-        
-        // Decrease wobble over time
-        wobbleAmountToAddX = Mathf.Lerp(wobbleAmountToAddX, 0, Time.deltaTime * Recovery);
-        wobbleAmountToAddZ = Mathf.Lerp(wobbleAmountToAddZ, 0, Time.deltaTime * Recovery);
+            velocity = (lastPos - transform.position) / Time.deltaTime;
+            angularVelocity = transform.rotation.eulerAngles - lastRot;
 
-        // Sine wave pulse
-        pulse = 2 * Mathf.PI * WobbleSpeed;
-        wobbleAmountX = wobbleAmountToAddX * Mathf.Sin(pulse * time);
-        wobbleAmountZ = wobbleAmountToAddZ * Mathf.Sin(pulse * time);
+            wobbleAmountToAddX += Mathf.Clamp((velocity.x + (angularVelocity.z * 0.2f)) * MaxWobble, -MaxWobble, MaxWobble);
+            wobbleAmountToAddZ += Mathf.Clamp((velocity.z + (angularVelocity.x * 0.2f)) * MaxWobble, -MaxWobble, MaxWobble);
 
-        rend.material.SetFloat(WobbleXID, wobbleAmountX);
-        rend.material.SetFloat(WobbleZID, wobbleAmountZ);
+            lastPos = transform.position;
+            lastRot = transform.rotation.eulerAngles;
+            mainRenderer.material.SetFloat(WobbleXID, wobbleAmountX);
+            mainRenderer.material.SetFloat(WobbleZID, wobbleAmountZ);
 
-        // Velocity calculation
-        velocity = (lastPos - transform.position) / Time.deltaTime;
-        angularVelocity = transform.rotation.eulerAngles - lastRot;
+            // SEND ZERO WOBBLE TO PRECIPITATE (It should be stable)
+            if(precipitateRenderer != null)
+            {
+                precipitateRenderer.material.SetFloat(WobbleXID, 0);
+                precipitateRenderer.material.SetFloat(WobbleZID, 0);
+            }
+        }
+    }
 
-        // Add to wobble
-        wobbleAmountToAddX += Mathf.Clamp((velocity.x + (angularVelocity.z * 0.2f)) * MaxWobble, -MaxWobble, MaxWobble);
-        wobbleAmountToAddZ += Mathf.Clamp((velocity.z + (angularVelocity.x * 0.2f)) * MaxWobble, -MaxWobble, MaxWobble);
+    public void AddLiquid(ChemicalData incomingChemical, float amountToAdd)
+    {
+        if (currentLiquidVolume + currentPptVolume + amountToAdd > maxVolume) return; // Overflow check simplified
+        if (currentLiquidVolume <= 0.1f && currentPptVolume <= 0.1f)
+        {
+            currentChemical = incomingChemical;
+            currentLiquidVolume += amountToAdd;
+            UpdateAllVisuals();
+            return;
+        }
 
-        lastPos = transform.position;
-        lastRot = transform.rotation.eulerAngles;
+        if (currentChemical == incomingChemical)
+        {
+            currentLiquidVolume += amountToAdd;
+            return;
+        }
+
+        if (registry != null)
+        {
+            ReactionRule rule = registry.FindReaction(currentChemical, incomingChemical);
+
+            if (rule != null)
+            {
+                if (rule.resultLiquid != null)
+                {
+                    currentChemical = rule.resultLiquid;
+                }
+                if (rule.hasPrecipitate && rule.resultPrecipitate != null)
+                {
+                    currentPptChemical = rule.resultPrecipitate;
+                    currentPptVolume += amountToAdd;
+                }
+                else
+                {
+                    currentLiquidVolume += amountToAdd;
+                }
+
+                UpdateAllVisuals();
+            }
+            else
+            {
+                currentLiquidVolume += amountToAdd;
+            }
+        }
+    }
+
+    public void UpdateAllVisuals()
+    {
+        if (currentChemical != null && mainRenderer != null)
+        {
+            mainRenderer.material.SetColor(LiquidColorID, currentChemical.liquidColor);
+            mainRenderer.material.SetFloat(SceneColorAmtID, currentChemical.sceneColourAmount);
+        }
+
+        if (currentPptChemical != null && precipitateRenderer != null)
+        {
+            precipitateRenderer.material.SetColor(LiquidColorID, currentPptChemical.liquidColor);
+            precipitateRenderer.material.SetFloat(SceneColorAmtID, currentPptChemical.sceneColourAmount);
+        }
     }
 }
