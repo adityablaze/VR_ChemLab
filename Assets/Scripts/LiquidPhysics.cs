@@ -23,6 +23,8 @@ public class LiquidPhysics : MonoBehaviour
     public float MaxWobble = 0.03f;
     public float WobbleSpeed = 1f;
     public float Recovery = 1f;
+    
+    private const float MinMovementThreshold = 0.001f; 
 
     // Internal variables
     private Mesh mesh;
@@ -39,15 +41,16 @@ public class LiquidPhysics : MonoBehaviour
 
     // Wobble Physics Variables
     private Vector3 lastPos;
-    private Vector3 velocity;
     private Vector3 lastRot;
-    private Vector3 angularVelocity;
     private float wobbleAmountX;
     private float wobbleAmountZ;
     private float wobbleAmountToAddX;
     private float wobbleAmountToAddZ;
     private float pulse;
     private float time = 0.5f;
+    
+    // State
+    private bool isWobbling = true; // Start active to settle initial state
 
     void Start()
     {
@@ -55,7 +58,10 @@ public class LiquidPhysics : MonoBehaviour
         mesh = GetComponent<MeshFilter>().mesh;
 
         SendMeshBounds();
-        UpdateAllVisuals();
+        UpdateAllVisuals(); 
+        
+        lastPos = transform.position;
+        lastRot = transform.rotation.eulerAngles;
     }
 
     void SendMeshBounds()
@@ -77,30 +83,67 @@ public class LiquidPhysics : MonoBehaviour
 
     void Update()
     {
-        UpdateAllVisuals();
+        // 1. Clamp Volumes
         currentLiquidVolume = Mathf.Clamp(currentLiquidVolume, 0, maxVolume);
         currentPptVolume = Mathf.Clamp(currentPptVolume, 0, maxVolume - currentLiquidVolume);
 
-        // --- CUTOFF & CORRECTION LOGIC ---
+        // 2. Calculate Fill & Tilt (Must run every frame for rotation accuracy)
+        UpdateFillPhysics();
+
+        // 3. WOBBLE PHYSICS
+        // First, calculate movement speed
+        Vector3 currentPos = transform.position;
+        Vector3 currentRot = transform.rotation.eulerAngles;
+
+        Vector3 velocity = (lastPos - currentPos) / Time.deltaTime;
+        Vector3 angularVelocity = currentRot - lastRot;
+
+        // Check if we are moving enough to matter (using sqrMagnitude is faster)
+        bool isMoving = velocity.sqrMagnitude > MinMovementThreshold || angularVelocity.sqrMagnitude > MinMovementThreshold;
         
-        // 1. Calculate Fill
+        // Check if we still have leftover wobble energy
+        bool hasWobbleEnergy = Mathf.Abs(wobbleAmountToAddX) > MinMovementThreshold || Mathf.Abs(wobbleAmountToAddZ) > MinMovementThreshold;
+
+        if (isMoving || hasWobbleEnergy || isWobbling)
+        {
+            UpdateWobble(velocity, angularVelocity);
+            
+            if (!isMoving && !hasWobbleEnergy)
+            {
+                isWobbling = false;
+                // Force Zero one last time to ensure it looks perfect
+                if(mainRenderer) {
+                    mainRenderer.material.SetFloat(WobbleXID, 0);
+                    mainRenderer.material.SetFloat(WobbleZID, 0);
+                }
+            }
+            else
+            {
+                isWobbling = true;
+            }
+        }
+
+        // Update history for next frame
+        lastPos = currentPos;
+        lastRot = currentRot;
+    }
+
+    void UpdateFillPhysics()
+    {
         float liquidFill = currentLiquidVolume / maxVolume;
         float pptFill = currentPptVolume / maxVolume;
 
-        // 2. Simple Correction: When horizontal, 50% volume looks like 100% fill on the radius
-        // We reduce the visual fill slightly as we tilt to prevent "overfilling" visual
-        // (Optional: You can tweak '0.8f' to adjust how much it reduces)
-        float tilt = Mathf.Abs(Vector3.Dot(transform.up, Vector3.up)); // 1 = upright, 0 = sideways
-        float correction = Mathf.Lerp(HorizonalFloatAdj, 1.0f, tilt); // Use 70% of fill value when sideways
+        // Tilt Correction
+        float tilt = Mathf.Abs(Vector3.Dot(transform.up, Vector3.up)); 
+        float correction = Mathf.Lerp(HorizonalFloatAdj, 1.0f, tilt); 
         
-        // Apply correction
+        // Apply to Shader
         if(mainRenderer) mainRenderer.material.SetFloat(FillID, liquidFill * correction);
         if(precipitateRenderer) precipitateRenderer.material.SetFloat(FillID, pptFill * correction);
 
-        // 3. THE CUTOFF: Disable renderer if virtually empty
+        // Cutoff Logic (Hide if empty)
         if (mainRenderer)
         {
-            // If less than 1mL (or 0.1%), turn it off
             bool hasLiquid = currentLiquidVolume > 1f; 
             if (mainRenderer.enabled != hasLiquid) mainRenderer.enabled = hasLiquid;
         }
@@ -110,39 +153,39 @@ public class LiquidPhysics : MonoBehaviour
             bool hasPpt = currentPptVolume > 1f;
             if (precipitateRenderer.enabled != hasPpt) precipitateRenderer.enabled = hasPpt;
         }
-        // ---------------------------------
 
         Vector3 localUp = transform.InverseTransformDirection(Vector3.up);
         if(mainRenderer) mainRenderer.material.SetVector(UpVectorID, localUp);
         if(precipitateRenderer) precipitateRenderer.material.SetVector(UpVectorID, localUp);
+    }
+
+    void UpdateWobble(Vector3 velocity, Vector3 angularVelocity)
+    {
+        if (mainRenderer == null || !mainRenderer.enabled) return;
+
+        time += Time.deltaTime;
         
-        // Wobble Physics
-        if (mainRenderer != null && mainRenderer.enabled) // Only calc wobble if visible
+        // Decay
+        wobbleAmountToAddX = Mathf.Lerp(wobbleAmountToAddX, 0, Time.deltaTime * Recovery);
+        wobbleAmountToAddZ = Mathf.Lerp(wobbleAmountToAddZ, 0, Time.deltaTime * Recovery);
+
+        // Oscillate
+        pulse = 2 * Mathf.PI * WobbleSpeed;
+        wobbleAmountX = wobbleAmountToAddX * Mathf.Sin(pulse * time);
+        wobbleAmountZ = wobbleAmountToAddZ * Mathf.Sin(pulse * time);
+
+        // Add Velocity Impact
+        wobbleAmountToAddX += Mathf.Clamp((velocity.x + (angularVelocity.z * 0.2f)) * MaxWobble, -MaxWobble, MaxWobble);
+        wobbleAmountToAddZ += Mathf.Clamp((velocity.z + (angularVelocity.x * 0.2f)) * MaxWobble, -MaxWobble, MaxWobble);
+
+        // Send to Shader
+        mainRenderer.material.SetFloat(WobbleXID, wobbleAmountX);
+        mainRenderer.material.SetFloat(WobbleZID, wobbleAmountZ);
+
+        if(precipitateRenderer != null)
         {
-            time += Time.deltaTime;
-            wobbleAmountToAddX = Mathf.Lerp(wobbleAmountToAddX, 0, Time.deltaTime * Recovery);
-            wobbleAmountToAddZ = Mathf.Lerp(wobbleAmountToAddZ, 0, Time.deltaTime * Recovery);
-
-            pulse = 2 * Mathf.PI * WobbleSpeed;
-            wobbleAmountX = wobbleAmountToAddX * Mathf.Sin(pulse * time);
-            wobbleAmountZ = wobbleAmountToAddZ * Mathf.Sin(pulse * time);
-
-            velocity = (lastPos - transform.position) / Time.deltaTime;
-            angularVelocity = transform.rotation.eulerAngles - lastRot;
-
-            wobbleAmountToAddX += Mathf.Clamp((velocity.x + (angularVelocity.z * 0.2f)) * MaxWobble, -MaxWobble, MaxWobble);
-            wobbleAmountToAddZ += Mathf.Clamp((velocity.z + (angularVelocity.x * 0.2f)) * MaxWobble, -MaxWobble, MaxWobble);
-
-            lastPos = transform.position;
-            lastRot = transform.rotation.eulerAngles;
-            mainRenderer.material.SetFloat(WobbleXID, wobbleAmountX);
-            mainRenderer.material.SetFloat(WobbleZID, wobbleAmountZ);
-
-            if(precipitateRenderer != null)
-            {
-                precipitateRenderer.material.SetFloat(WobbleXID, 0);
-                precipitateRenderer.material.SetFloat(WobbleZID, 0);
-            }
+            precipitateRenderer.material.SetFloat(WobbleXID, 0);
+            precipitateRenderer.material.SetFloat(WobbleZID, 0);
         }
     }
 
@@ -150,7 +193,7 @@ public class LiquidPhysics : MonoBehaviour
     {
         if (currentLiquidVolume + currentPptVolume + amountToAdd > maxVolume) return;
         
-        // If empty, just set chemical and add
+        // If waking up from empty, ensure visuals update
         if (currentLiquidVolume <= 0.1f && currentPptVolume <= 0.1f)
         {
             currentChemical = incomingChemical;
@@ -181,7 +224,7 @@ public class LiquidPhysics : MonoBehaviour
                 {
                     currentLiquidVolume += amountToAdd;
                 }
-                UpdateAllVisuals();
+                UpdateAllVisuals(); // Update Color only on reaction
             }
             else
             {
