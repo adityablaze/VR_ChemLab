@@ -7,7 +7,7 @@ public class ChemicalData : ScriptableObject
     public string chemicalName = "Water";
     
     [Header("Visuals")]
-    [ColorUsage(true, true)] // First 'true' = show alpha, Second 'true' = enable HDR
+    [ColorUsage(true, true)]
     public Color liquidColor; 
     
     [ColorUsage(true, true)]
@@ -19,5 +19,4 @@ public class ChemicalData : ScriptableObject
     public float viscosity = 0.5f;
     [Header("Properties")]
     public bool isDangerous = false; // For spilling logic later
-    // You can add more later: pH, flammability, etc.
 }

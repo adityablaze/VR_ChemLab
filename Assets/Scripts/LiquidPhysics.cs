@@ -19,6 +19,12 @@ public class LiquidPhysics : MonoBehaviour
     public ChemicalData currentPptChemical; 
     public ReactionRegistry registry;
 
+    [Header("Visual Smoothness")]
+    public float colorChangeSpeed = 2.0f; 
+
+    private Coroutine liquidChangeRoutine;
+    private Coroutine pptChangeRoutine;
+
     [Header("Wobble Settings")]
     public float MaxWobble = 0.03f;
     public float WobbleSpeed = 1f;
@@ -235,16 +241,55 @@ public class LiquidPhysics : MonoBehaviour
 
     public void UpdateAllVisuals()
     {
+        // 1. Handle Main Liquid Transition
         if (currentChemical != null && mainRenderer != null)
         {
-            mainRenderer.material.SetColor(LiquidColorID, currentChemical.liquidColor);
-            mainRenderer.material.SetFloat(SceneColorAmtID, currentChemical.sceneColourAmount);
+            // Stop any old transition so they don't fight
+            if (liquidChangeRoutine != null) StopCoroutine(liquidChangeRoutine);
+            
+            // Start the new smooth transition
+            liquidChangeRoutine = StartCoroutine(LerpColor(
+                mainRenderer, 
+                currentChemical.liquidColor, 
+                currentChemical.sceneColourAmount
+            ));
         }
 
+        // 2. Handle Precipitate Transition
         if (currentPptChemical != null && precipitateRenderer != null)
         {
-            precipitateRenderer.material.SetColor(LiquidColorID, currentPptChemical.liquidColor);
-            precipitateRenderer.material.SetFloat(SceneColorAmtID, currentPptChemical.sceneColourAmount);
+            if (pptChangeRoutine != null) StopCoroutine(pptChangeRoutine);
+            
+            pptChangeRoutine = StartCoroutine(LerpColor(
+                precipitateRenderer, 
+                currentPptChemical.liquidColor, 
+                currentPptChemical.sceneColourAmount
+            ));
+        }
+    }
+
+    // The Worker Function: smoothly changes color over time
+    System.Collections.IEnumerator LerpColor(Renderer targetRenderer, Color targetColor, float targetSceneAmt)
+    {
+        // Get starting values from the material currently
+        Color startColor = targetRenderer.material.GetColor(LiquidColorID);
+        float startSceneAmt = targetRenderer.material.GetFloat(SceneColorAmtID);
+        float t = 0;
+
+        // Loop until t reaches 1 (100% complete)
+        while (t < 1f)
+        {
+            t += Time.deltaTime * colorChangeSpeed;
+            
+            // Calculate intermediate values
+            Color newColor = Color.Lerp(startColor, targetColor, t);
+            float newAmt = Mathf.Lerp(startSceneAmt, targetSceneAmt, t);
+            
+            // Apply to shader
+            targetRenderer.material.SetColor(LiquidColorID, newColor);
+            targetRenderer.material.SetFloat(SceneColorAmtID, newAmt);
+            
+            yield return null; // Wait for next frame
         }
     }
 
