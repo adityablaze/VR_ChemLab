@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: NaNitroprusside
   m_EditorClassIdentifier: Assembly-CSharp::ChemicalData
   chemicalName: NaNitroprusside
-  liquidColor: {r: 0, g: 0.61960787, b: 1, a: 1}
-  liquidTopColor: {r: 1.5104778, g: 3.0439591, b: 3.953349, a: 1}
+  liquidColor: {r: 2.418839, g: 2.5861897, b: 0, a: 1}
+  liquidTopColor: {r: 5.278032, g: 5.278032, b: 5.278032, a: 1}
   sceneColourAmount: 0.94
   viscosity: 0.5
   isDangerous: 0

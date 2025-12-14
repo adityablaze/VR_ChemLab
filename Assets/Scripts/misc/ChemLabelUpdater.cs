@@ -8,7 +8,6 @@ public class ChemLabelUpdater : MonoBehaviour
     public Text uiText;
     void Start()
     {
-        uiText = gameObject.GetComponentInChildren<Text>();
         uiText.text = chemicalData.chemicalName.ToString();
     }
     void Update()
