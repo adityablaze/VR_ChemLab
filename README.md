@@ -39,8 +39,8 @@ The core of the chemical interaction system relies on Unity's **ScriptableObject
 This modularity allows for a "Swap and Play" workflow. We can change the liquid inside a beaker simply by dragging a different Chemical ScriptableObject into the inspector slot before running the application. No code changes are required to introduce new chemicals.
 
 ![ezgif-89aa6a704860ef2c](https://github.com/user-attachments/assets/15ef1db5-510e-4ec2-9173-c49f429a4444)
-
-https://github.com/user-attachments/assets/5087bdb6-4ca3-43aa-b66c-87ba2a96dc9c
+![liq](https://github.com/user-attachments/assets/1690bb07-a151-4de3-aa61-e545c582ce1c)
+![Wobble](https://github.com/user-attachments/assets/e203b88d-ccf9-418c-8a26-b7fb21213684)
 
 
 ### 2. Liquid Shader
@@ -51,7 +51,8 @@ To achieve a realistic look for the fluids, a custom shader was implemented. Thi
 - **Wobble/Slosh:** Reacts to the velocity and angular velocity of the container to simulate liquid movement.
 - **Color Mixing:** Blends colors when two different chemicals are mixed based on the reaction rules.
 
-!Shader Demo
+![Shdergraph](https://github.com/user-attachments/assets/91e4fe7f-fa84-4924-a363-6ede1d7a0cb3)
+
 
 ### 3. XR Implementation
 
