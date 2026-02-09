@@ -24,7 +24,7 @@ This project was developed in a little bit of a short timeline. It took me about
 
 _Watch a short video demonstration of the laboratory capabilities:_
 
-[linkedInPost](https://www.linkedin.com/posts/aditya-nayak-77086727a_unity-virtualreality-xr-activity-7426747973633576961-Xd4A?utm_source=share&utm_medium=member_desktop&rcm=ACoAAEQdWYQBHJdKqeueaDZRsxaZkxwmqUUJDI8)
+---
 
 ## 🛠️ Technical Details
 
@@ -42,17 +42,17 @@ This modularity allows for a "Swap and Play" workflow. We can change the liquid 
 ![liq](https://github.com/user-attachments/assets/1690bb07-a151-4de3-aa61-e545c582ce1c)
 ![Wobble](https://github.com/user-attachments/assets/e203b88d-ccf9-418c-8a26-b7fb21213684)
 
-
 ### 2. Liquid Shader
 
 To achieve a realistic look for the fluids, a custom shader was implemented. This shader handles:
 
-- **Fill Level:** Adjusts the visual volume based on the container's fill amount.
-- **Wobble/Slosh:** Reacts to the velocity and angular velocity of the container to simulate liquid movement.
-- **Color Mixing:** Blends colors when two different chemicals are mixed based on the reaction rules.
+- **Dynamic Surface Culling:** The shader calculates a fill plane based on the fill amount and wobble parameters, discarding pixels above this plane to simulate the liquid's surface level dynamically.
+- **Top Face Rendering:** It renders the top surface of the liquid by rendering back-faces of the mesh that are below the fill plane, creating the illusion of a solid volume.
+- **Fill Accuracy:** Uses `LocalYMin` and `LocalYMax` properties, controlled via external scripts, to map the fill amount accurately to the physical bounds of the specific container mesh volume.
+- **Wobble/Slosh:** The shader exposes `WobbleX` and `WobbleZ` parameters which are driven by external scripts calculating velocity and angular velocity to simulate liquid movement.
+- **Purely Visual:** The shader does not handle chemical logic it receives color and fill properties from the C# scripts which manage the reaction state.
 
 ![Shdergraph](https://github.com/user-attachments/assets/91e4fe7f-fa84-4924-a363-6ede1d7a0cb3)
-
 
 ### 3. XR Implementation
 
@@ -63,10 +63,12 @@ I have implemented both Telepotation and Contuious Move for locomotion, and Snap
 
 The development of the Liquid Shader and specific VR mechanics was heavily inspired by the following resources. Huge thanks to these creators for sharing their knowledge:
 
-- **Shader Reference 1:** https://youtu.be/DKSpgFuKeb4
-- **Shader Reference 2:** https://youtu.be/tI3USKIbnh0
-- **Shader Reference 3:** https://youtu.be/p9NeBW4pgGk
-- **Other Shader Reference:** https://www.patreon.com/posts/fake-liquid-urp-75665057
+**Shader References:**
+
+- https://youtu.be/DKSpgFuKeb4
+- https://youtu.be/tI3USKIbnh0
+- https://youtu.be/p9NeBW4pgGk
+- https://www.patreon.com/posts/fake-liquid-urp-75665057
 
 ## 📦 Assets Used
 
