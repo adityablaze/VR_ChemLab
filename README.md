@@ -23,7 +23,7 @@ This project was developed in a little bit of a short timeline. It took me about
 ## 🎥 Demo
 
 _Watch a short video demonstration of the laboratory capabilities:_
-
+[linkedInPost](https://www.linkedin.com/posts/aditya-nayak-77086727a_unity-virtualreality-xr-activity-7426747973633576961-Xd4A?utm_source=share&utm_medium=member_desktop&rcm=ACoAAEQdWYQBHJdKqeueaDZRsxaZkxwmqUUJDI8)
 ---
 
 ## 🛠️ Technical Details
