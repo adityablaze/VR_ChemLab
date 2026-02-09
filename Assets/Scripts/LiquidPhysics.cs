@@ -9,18 +9,18 @@ public class LiquidPhysics : MonoBehaviour
     public Renderer precipitateRenderer;
 
     [Header("Volume Settings")]
-    public float maxVolume = 1000f; 
+    public float maxVolume = 1000f;
     public float currentLiquidVolume = 500f;
     public float currentPptVolume = 0f;
     public float HorizonalFloatAdj = 0.13f;
 
     [Header("Chemical Content")]
-    public ChemicalData currentChemical; 
-    public ChemicalData currentPptChemical; 
+    public ChemicalData currentChemical;
+    public ChemicalData currentPptChemical;
     public ReactionRegistry registry;
 
     [Header("Visual Smoothness")]
-    public float colorChangeSpeed = 2.0f; 
+    public float colorChangeSpeed = 2.0f;
 
     private Coroutine liquidChangeRoutine;
     private Coroutine pptChangeRoutine;
@@ -29,12 +29,12 @@ public class LiquidPhysics : MonoBehaviour
     public float MaxWobble = 0.03f;
     public float WobbleSpeed = 1f;
     public float Recovery = 1f;
-    
-    private const float MinMovementThreshold = 0.001f; 
+
+    private const float MinMovementThreshold = 0.001f;
 
     // Internal variables
     private Mesh mesh;
-    
+
     // Shader Property IDs
     private static readonly int FillID = Shader.PropertyToID("_Fill");
     private static readonly int LiquidColorID = Shader.PropertyToID("_LiquidColour");
@@ -54,7 +54,7 @@ public class LiquidPhysics : MonoBehaviour
     private float wobbleAmountToAddZ;
     private float pulse;
     private float time = 0.5f;
-    
+
     // State
     private bool isWobbling = true; // Start active to settle initial state
 
@@ -64,8 +64,8 @@ public class LiquidPhysics : MonoBehaviour
         mesh = GetComponent<MeshFilter>().mesh;
 
         SendMeshBounds();
-        UpdateAllVisuals(); 
-        
+        UpdateAllVisuals();
+
         lastPos = transform.position;
         lastRot = transform.rotation.eulerAngles;
     }
@@ -75,12 +75,12 @@ public class LiquidPhysics : MonoBehaviour
         if (mesh == null) return;
         Bounds bounds = mesh.bounds;
 
-        if(mainRenderer != null)
+        if (mainRenderer != null)
         {
             mainRenderer.material.SetFloat(LocalYMinID, bounds.min.y);
             mainRenderer.material.SetFloat(LocalYMaxID, bounds.max.y);
         }
-        if(precipitateRenderer != null)
+        if (precipitateRenderer != null)
         {
             precipitateRenderer.material.SetFloat(LocalYMinID, bounds.min.y);
             precipitateRenderer.material.SetFloat(LocalYMaxID, bounds.max.y);
@@ -106,19 +106,20 @@ public class LiquidPhysics : MonoBehaviour
 
         // Check if we are moving enough to matter (using sqrMagnitude is faster)
         bool isMoving = velocity.sqrMagnitude > MinMovementThreshold || angularVelocity.sqrMagnitude > MinMovementThreshold;
-        
+
         // Check if we still have leftover wobble energy
         bool hasWobbleEnergy = Mathf.Abs(wobbleAmountToAddX) > MinMovementThreshold || Mathf.Abs(wobbleAmountToAddZ) > MinMovementThreshold;
 
         if (isMoving || hasWobbleEnergy || isWobbling)
         {
             UpdateWobble(velocity, angularVelocity);
-            
+
             if (!isMoving && !hasWobbleEnergy)
             {
                 isWobbling = false;
                 // Force Zero one last time to ensure it looks perfect
-                if(mainRenderer) {
+                if (mainRenderer)
+                {
                     mainRenderer.material.SetFloat(WobbleXID, 0);
                     mainRenderer.material.SetFloat(WobbleZID, 0);
                 }
@@ -140,17 +141,17 @@ public class LiquidPhysics : MonoBehaviour
         float pptFill = currentPptVolume / maxVolume;
 
         // Tilt Correction
-        float tilt = Mathf.Abs(Vector3.Dot(transform.up, Vector3.up)); 
-        float correction = Mathf.Lerp(HorizonalFloatAdj, 1.0f, tilt); 
-        
+        float tilt = Mathf.Abs(Vector3.Dot(transform.up, Vector3.up));
+        float correction = Mathf.Lerp(HorizonalFloatAdj, 1.0f, tilt);
+
         // Apply to Shader
-        if(mainRenderer) mainRenderer.material.SetFloat(FillID, liquidFill * correction);
-        if(precipitateRenderer) precipitateRenderer.material.SetFloat(FillID, pptFill * correction);
+        if (mainRenderer) mainRenderer.material.SetFloat(FillID, liquidFill * correction);
+        if (precipitateRenderer) precipitateRenderer.material.SetFloat(FillID, pptFill * correction);
 
         // Cutoff Logic (Hide if empty)
         if (mainRenderer)
         {
-            bool hasLiquid = currentLiquidVolume > 1f; 
+            bool hasLiquid = currentLiquidVolume > 1f;
             if (mainRenderer.enabled != hasLiquid) mainRenderer.enabled = hasLiquid;
         }
 
@@ -161,8 +162,8 @@ public class LiquidPhysics : MonoBehaviour
         }
 
         Vector3 localUp = transform.InverseTransformDirection(Vector3.up);
-        if(mainRenderer) mainRenderer.material.SetVector(UpVectorID, localUp);
-        if(precipitateRenderer) precipitateRenderer.material.SetVector(UpVectorID, localUp);
+        if (mainRenderer) mainRenderer.material.SetVector(UpVectorID, localUp);
+        if (precipitateRenderer) precipitateRenderer.material.SetVector(UpVectorID, localUp);
     }
 
     void UpdateWobble(Vector3 velocity, Vector3 angularVelocity)
@@ -170,7 +171,7 @@ public class LiquidPhysics : MonoBehaviour
         if (mainRenderer == null || !mainRenderer.enabled) return;
 
         time += Time.deltaTime;
-        
+
         // Decay
         wobbleAmountToAddX = Mathf.Lerp(wobbleAmountToAddX, 0, Time.deltaTime * Recovery);
         wobbleAmountToAddZ = Mathf.Lerp(wobbleAmountToAddZ, 0, Time.deltaTime * Recovery);
@@ -188,7 +189,7 @@ public class LiquidPhysics : MonoBehaviour
         mainRenderer.material.SetFloat(WobbleXID, wobbleAmountX);
         mainRenderer.material.SetFloat(WobbleZID, wobbleAmountZ);
 
-        if(precipitateRenderer != null)
+        if (precipitateRenderer != null)
         {
             precipitateRenderer.material.SetFloat(WobbleXID, 0);
             precipitateRenderer.material.SetFloat(WobbleZID, 0);
@@ -198,7 +199,7 @@ public class LiquidPhysics : MonoBehaviour
     public void AddLiquid(ChemicalData incomingChemical, float amountToAdd)
     {
         if (currentLiquidVolume + currentPptVolume + amountToAdd > maxVolume) return;
-        
+
         // If waking up from empty, ensure visuals update
         if (currentLiquidVolume <= 0.1f && currentPptVolume <= 0.1f)
         {
@@ -246,11 +247,11 @@ public class LiquidPhysics : MonoBehaviour
         {
             // Stop any old transition so they don't fight
             if (liquidChangeRoutine != null) StopCoroutine(liquidChangeRoutine);
-            
+
             // Start the new smooth transition
             liquidChangeRoutine = StartCoroutine(LerpColor(
-                mainRenderer, 
-                currentChemical.liquidColor, 
+                mainRenderer,
+                currentChemical.liquidColor,
                 currentChemical.sceneColourAmount
             ));
         }
@@ -259,10 +260,10 @@ public class LiquidPhysics : MonoBehaviour
         if (currentPptChemical != null && precipitateRenderer != null)
         {
             if (pptChangeRoutine != null) StopCoroutine(pptChangeRoutine);
-            
+
             pptChangeRoutine = StartCoroutine(LerpColor(
-                precipitateRenderer, 
-                currentPptChemical.liquidColor, 
+                precipitateRenderer,
+                currentPptChemical.liquidColor,
                 currentPptChemical.sceneColourAmount
             ));
         }
@@ -280,15 +281,15 @@ public class LiquidPhysics : MonoBehaviour
         while (t < 1f)
         {
             t += Time.deltaTime * colorChangeSpeed;
-            
+
             // Calculate intermediate values
             Color newColor = Color.Lerp(startColor, targetColor, t);
             float newAmt = Mathf.Lerp(startSceneAmt, targetSceneAmt, t);
-            
+
             // Apply to shader
             targetRenderer.material.SetColor(LiquidColorID, newColor);
             targetRenderer.material.SetFloat(SceneColorAmtID, newAmt);
-            
+
             yield return null; // Wait for next frame
         }
     }

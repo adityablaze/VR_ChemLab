@@ -40,7 +40,7 @@ public class SaltBurn : MonoBehaviour
 
         // 2. Disable this entire Salt GameObject
         // This hides the mesh, removes the collider, and stops this script immediately.
-        gameObject.SetActive(false); 
+        gameObject.SetActive(false);
     }
 
     void OnTriggerEnter(Collider other)

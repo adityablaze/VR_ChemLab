@@ -6,11 +6,11 @@ public class TestReaction : MonoBehaviour
     public LiquidPhysics targetBeaker;
     public ChemicalData chemicalToPour;
     public float amount = 50f;
-    public InputActionReference testbutton; 
+    public InputActionReference testbutton;
 
     private void OnEnable()
     {
-        if (testbutton != null && testbutton.action != null) 
+        if (testbutton != null && testbutton.action != null)
             testbutton.action.Enable();
     }
 

@@ -4,7 +4,7 @@ using UnityEngine;
 public class LiquidPourer : MonoBehaviour
 {
     [Header("Setup")]
-    public Transform spout; 
+    public Transform spout;
     public LineRenderer streamLine;
 
     [Header("Settings")]
@@ -13,9 +13,9 @@ public class LiquidPourer : MonoBehaviour
 
     [Header("Hazard Settings")]
     [Tooltip("Drag your AcidSpill prefab here")]
-    public GameObject acidSpillPrefab; 
+    public GameObject acidSpillPrefab;
     [Tooltip("Minimum time between spawning spills (prevents lag)")]
-    public float spillCooldown = 1.0f; 
+    public float spillCooldown = 1.0f;
 
     private LiquidPhysics sourceContainer;
     private float lastSpillTime = 0f;
@@ -23,7 +23,7 @@ public class LiquidPourer : MonoBehaviour
     void Start()
     {
         sourceContainer = GetComponent<LiquidPhysics>();
-        
+
         if (streamLine)
         {
             streamLine.positionCount = 2;
@@ -57,12 +57,12 @@ public class LiquidPourer : MonoBehaviour
         {
             streamLine.enabled = true;
             streamLine.SetPosition(0, spout.position);
-            
-            if(sourceContainer.currentChemical != null)
+
+            if (sourceContainer.currentChemical != null)
             {
-                 Color c = sourceContainer.currentChemical.liquidColor;
-                 streamLine.startColor = c;
-                 streamLine.endColor = c;
+                Color c = sourceContainer.currentChemical.liquidColor;
+                streamLine.startColor = c;
+                streamLine.endColor = c;
             }
         }
 
@@ -73,7 +73,7 @@ public class LiquidPourer : MonoBehaviour
             if (streamLine) streamLine.SetPosition(1, hit.point);
 
             LiquidPhysics target = hit.collider.GetComponentInParent<LiquidPhysics>();
-            
+
             if (target != null)
             {
                 // TRANSFER LOGIC (Pouring into another flask)

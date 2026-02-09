@@ -11,12 +11,12 @@ public class ReactionRegistry : ScriptableObject
         foreach (var rule in rules)
         {
             // Matches A+B or B+A
-            if ((rule.inputChemicalA == a && rule.inputChemicalB == b) || 
+            if ((rule.inputChemicalA == a && rule.inputChemicalB == b) ||
                 (rule.inputChemicalA == b && rule.inputChemicalB == a))
             {
                 return rule;
             }
         }
-        return null; 
+        return null;
     }
 }

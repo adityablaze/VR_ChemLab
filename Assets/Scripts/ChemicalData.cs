@@ -5,11 +5,11 @@ public class ChemicalData : ScriptableObject
 {
     [Header("Identity")]
     public string chemicalName = "Water";
-    
+
     [Header("Visuals")]
     [ColorUsage(true, true)]
-    public Color liquidColor; 
-    
+    public Color liquidColor;
+
     [ColorUsage(true, true)]
     public Color liquidTopColor;
 

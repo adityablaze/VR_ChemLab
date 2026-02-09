@@ -5,7 +5,7 @@ using System.Collections;
 public class AcidCorrosion : MonoBehaviour
 {
     [Header("Corrosion Settings")]
-    public float corrosionDuration = 5.0f; 
+    public float corrosionDuration = 5.0f;
     [Range(0f, 1f)] public float startOpacity = 0.05f;
     [Range(0f, 1f)] public float targetOpacity = 0.95f;
 
@@ -16,7 +16,7 @@ public class AcidCorrosion : MonoBehaviour
 
     [Header("References")]
     public DecalProjector decal;
-    public AudioSource fizzSound; 
+    public AudioSource fizzSound;
     public ParticleSystem smokeParticles;
     public Transform warningUI; //Transform to scale it
 
@@ -79,7 +79,7 @@ public class AcidCorrosion : MonoBehaviour
         float animTime = 0f;
         float duration = 0.5f;
         Vector3 finalScale = warningUI.localScale; // Remember the size you set in Editor
-        
+
         warningUI.localScale = Vector3.zero; // Start invisible
 
         while (animTime < duration)
@@ -104,7 +104,7 @@ public class AcidCorrosion : MonoBehaviour
         //Stop Smoke Emission
         if (smokeParticles != null)
         {
-            smokeParticles.Stop(); 
+            smokeParticles.Stop();
         }
 
         //Fade Audio Volume
@@ -117,13 +117,13 @@ public class AcidCorrosion : MonoBehaviour
             {
                 fadeTimer += Time.deltaTime;
                 float t = fadeTimer / audioFadeTime;
-                
+
                 fizzSound.volume = Mathf.Lerp(startVol, residualVolume, t);
                 yield return null;
             }
-            
+
             fizzSound.volume = residualVolume;
-            
+
             // Optional: If residual is 0, just stop it to save CPU
             if (residualVolume <= 0.01f) fizzSound.Stop();
         }
