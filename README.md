@@ -38,7 +38,10 @@ The core of the chemical interaction system relies on Unity's **ScriptableObject
 **Inspector Workflow:**
 This modularity allows for a "Swap and Play" workflow. We can change the liquid inside a beaker simply by dragging a different Chemical ScriptableObject into the inspector slot before running the application. No code changes are required to introduce new chemicals.
 
-!Scriptable Object Workflow
+![ezgif-89aa6a704860ef2c](https://github.com/user-attachments/assets/15ef1db5-510e-4ec2-9173-c49f429a4444)
+
+https://github.com/user-attachments/assets/5087bdb6-4ca3-43aa-b66c-87ba2a96dc9c
+
 
 ### 2. Liquid Shader
 
