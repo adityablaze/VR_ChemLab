@@ -2,6 +2,12 @@
 
 **VR_ChemLab** is an interactive, educational Virtual Reality simulation designed to replicate a chemistry laboratory environment. This application allows users to perform experiments, handle apparatus, and observe chemical reactions in a safe, virtual space.
 
+## 🎥 Demo
+
+_Watch a short video demonstration of the laboratory capabilities:_
+[LinkedInPostdemo](https://www.linkedin.com/posts/aditya-nayak-77086727a_unity-virtualreality-xr-activity-7426747973633576961-Xd4A?utm_source=share&utm_medium=member_desktop&rcm=ACoAAEQdWYQBHJdKqeueaDZRsxaZkxwmqUUJDI8)
+[DemoVideo](https://drive.google.com/file/d/1oAFcsEBm5EgQOKUYg5CZVXEvqSM6qxNJ/view?usp=sharing)
+
 ## 🎓 About The Project
 
 This project was developed as a **Minor Project for the 5th Semester**.
@@ -20,10 +26,6 @@ This project was developed in a little bit of a short timeline. It took me about
 - **VR Locomotion:** Implements standard VR movement (Teleportation and Continuous Move) and Snap/Smooth turning using the **Unity XR Interaction Toolkit**.
 - **Educational Sandbox:** A safe environment to experiment with volatile substances.
 
-## 🎥 Demo
-
-_Watch a short video demonstration of the laboratory capabilities:_
-[LinkedInPostVideo](https://www.linkedin.com/posts/aditya-nayak-77086727a_unity-virtualreality-xr-activity-7426747973633576961-Xd4A?utm_source=share&utm_medium=member_desktop&rcm=ACoAAEQdWYQBHJdKqeueaDZRsxaZkxwmqUUJDI8)
 
 ## 🛠️ Technical Details
 
