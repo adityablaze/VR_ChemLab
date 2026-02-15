@@ -7,7 +7,7 @@
 _Watch a short video demonstration of the laboratory capabilities:_ <br>
 🔗 [LinkedIn Post Demo](https://www.linkedin.com/posts/aditya-nayak-77086727a_unity-virtualreality-xr-activity-7426747973633576961-Xd4A?utm_source=share&utm_medium=member_desktop&rcm=ACoAAEQdWYQBHJdKqeueaDZRsxaZkxwmqUUJDI8)
 <br>
-🔗 [Full Demo Video (Drive)](https://drive.google.com/file/d/1oAFcsEBm5EgQOKUYg5CZVXEvqSM6qxNJ/view?usp=sharing)
+🔗 [Full Demo Video (Drive)](https://drive.google.com/file/d/1exGSQh9-ES8RK4jsECwWjd5ULTvYZWDA/view?usp=sharing)
 
 
 ## 🎓 About The Project
