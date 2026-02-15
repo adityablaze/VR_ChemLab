@@ -7,7 +7,8 @@
 _Watch a short video demonstration of the laboratory capabilities:_ <br>
 [LinkedInPostdemo](https://www.linkedin.com/posts/aditya-nayak-77086727a_unity-virtualreality-xr-activity-7426747973633576961-Xd4A?utm_source=share&utm_medium=member_desktop&rcm=ACoAAEQdWYQBHJdKqeueaDZRsxaZkxwmqUUJDI8)
 <br>
-[DemoVideo](https://drive.google.com/file/d/1oAFcsEBm5EgQOKUYg5CZVXEvqSM6qxNJ/view?usp=sharing)
+[![Watch Demo](https://img.shields.io/badge/Watch-Demo-blue?style=for-the-badge)](https://drive.google.com/...)
+
 
 ## 🎓 About The Project
 
